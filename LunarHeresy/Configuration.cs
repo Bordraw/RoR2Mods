@@ -8,6 +8,7 @@ namespace LunarHeresy
         public static ConfigEntry<float> DropChance;
         public static ConfigEntry<float> DropMulti;
         public static ConfigEntry<float> DropMin;
+        public static ConfigEntry<bool> ShareLunarCoins;
 
         public static ConfigEntry<float> NewtShrineCost;
         public static ConfigEntry<float> PodCost;
@@ -22,24 +23,30 @@ namespace LunarHeresy
 
         public static void Register(LunarHeresy instance)
         {
-            #region Coin Drop Rate
+            #region Lunar Coins
             DropChance = instance.Config.Bind(
-                "Coin Drop Rate", 
+                "Lunar Coins", 
                 "Drop Chance", 
-                1.5f, 
+                1.5f,
                 new ConfigDescription("The initial %chance for enemies to drop coins. Vanilla is 0.5%")
                 );
             DropMulti = instance.Config.Bind(
-                "Coin Drop Rate", 
+                "Lunar Coins", 
                 "Drop Multiplier", 
                 0.90f, 
                 new ConfigDescription("The multiplier applied to the drop chance after a coin has dropped. Vanilla is 0.5 (chance reduced by 50% after each drop)")
                 );
             DropMin = instance.Config.Bind(
-                "Coin Drop Rate", 
+                "Lunar Coins", 
                 "Drop Min Chance", 
                 0.5f, 
                 new ConfigDescription("The lowest %chance for enemies to drop coins after DropMulti is applied. Vanilla is 0")
+                );
+            ShareLunarCoins = instance.Config.Bind(
+                "Lunar Coins",
+                "Share Lunar Coin Pickups",
+                true,
+                new ConfigDescription("Whether to share all lunar coin pickups among each player. Vanilla is false")
                 );
             #endregion
 

@@ -33,6 +33,9 @@ namespace LunarHeresy
             var initDelegate = typeof(PlayerCharacterMasterController).GetNestedTypes(allFlags)[0].GetMethodCached(name: "<Init>b__72_0");
             MonoMod.RuntimeDetour.HookGen.HookEndpointManager.Modify(initDelegate, (Action<ILContext>)CoinDropHook);
 
+            // Share lunar coin drops
+            On.RoR2.GenericPickupController.OnInteractionBegin += GenericPickupController_OnInteractionBegin;
+
             // Bazaar is awful and requires a million hooks to do simple things
             // It has pre-loaded instances of the shop pods, seer stations, and recycler, so changing the prefabs does nothing.
             // Thus, we are forced to hook into their behaviors instead.
@@ -52,6 +55,7 @@ namespace LunarHeresy
             On.EntityStates.Missions.LunarScavengerEncounter.FadeOut.OnEnter += LunarScavengerEncounter_FadeOut;
         }
 
+        #region Per-Run-Coins
         private static void Run_Start(On.RoR2.Run.orig_Start orig, Run self)
         {
             orig(self);
@@ -67,7 +71,6 @@ namespace LunarHeresy
             }
         }
 
-        #region EphemeralCoin
         private static void HUD_Update(On.RoR2.UI.HUD.orig_Update orig, RoR2.UI.HUD self)
         {
             orig(self);
@@ -108,7 +111,7 @@ namespace LunarHeresy
         }
         #endregion
 
-        #region CoinDrop
+        #region Coin Drop
         private static void PlayerCharacterMasterController_Awake(On.RoR2.PlayerCharacterMasterController.orig_Awake orig, PlayerCharacterMasterController self)
         {
             orig(self);
@@ -132,6 +135,24 @@ namespace LunarHeresy
             {
                 return Math.Max(originalChance, Configuration.DropMin.Value);
             });
+        }
+
+        private static void GenericPickupController_OnInteractionBegin(On.RoR2.GenericPickupController.orig_OnInteractionBegin orig, GenericPickupController self, Interactor interactor)
+        {
+            orig(self, interactor);
+
+            if (NetworkServer.active && Configuration.ShareLunarCoins.Value &&
+                self.pickupIndex == PickupCatalog.FindPickupIndex("LunarCoin.Coin0"))
+            {
+                foreach (var pcmc in PlayerCharacterMasterController.instances)
+                {
+                    // Award it to everyone but who picked it up
+                    if (interactor.GetComponent<CharacterBody>() != pcmc.master.GetBody())
+                    {
+                        pcmc.networkUser.AwardLunarCoins(1);
+                    }
+                }
+            }
         }
         #endregion
 

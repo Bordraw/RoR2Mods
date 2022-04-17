@@ -10,6 +10,7 @@
 - A portal to the bazaar now opens after killing the twisted scavenger, allowing you to continue looping with the ten coins it drops.
   - If you wait long enough after defeating the twisted scavenger, your run will automatically end.
   - This makes the twisted scav fight the ideal way to unlock the artificer
+- Lunar coin pickups are shared with the entire multiplayer lobby the same way gold is *(Configurable)*.
 
 ## Lunar Coin Price Changes
 - Prices for lunar interactables have been reduced *(Configurable)*:

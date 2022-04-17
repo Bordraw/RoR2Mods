@@ -11,7 +11,7 @@ namespace LunarHeresy
     public static class LunarCauldronHandler
     {
 
-        internal static string[] cauldronInteractables = {
+        internal static readonly string[] cauldronInteractables = {
             "RoR2/Base/LunarCauldrons/LunarCauldron, GreenToRed Variant.prefab",
             "RoR2/Base/LunarCauldrons/LunarCauldron, RedToWhite Variant.prefab",
             "RoR2/Base/LunarCauldrons/LunarCauldron, WhiteToGreen.prefab",
@@ -99,11 +99,11 @@ namespace LunarHeresy
 
                 if (!performEdit)
                 {
-                    LunarHeresy.Logger.LogWarning("No edits necessary for white cauldron");
+                    LunarHeresy.Logger.LogDebug("No edits necessary for white cauldron drop event");
                     return;
                 }
 
-                LunarHeresy.Logger.LogWarning("Modifying white cauldron");
+                LunarHeresy.Logger.LogDebug("Modifying white cauldron drop event");
 
                 listenerGroup.Clear();
 

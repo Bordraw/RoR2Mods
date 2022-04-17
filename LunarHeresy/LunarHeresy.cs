@@ -21,6 +21,7 @@ namespace LunarHeresy
         public const string PluginGUID = PluginAuthor + "." + PluginName;
 
         public static new BepInEx.Logging.ManualLogSource Logger;
+        public static PluginInfo PluginInfo { get; private set; }
 
         // The Awake() method is run at the very start when the game is initialized.
         public void Awake()
@@ -28,8 +29,14 @@ namespace LunarHeresy
             // Setup logger for debugging
             Logger = base.Logger;
 
+            // Store PluginInfo
+            PluginInfo = base.Info;
+
             // Load configuration
             Configuration.Register(this);
+
+            // Register language files with R2API
+            Languages.Register();
 
             // Enable per-run lunar coins
             LunarCoinHandler.Register();

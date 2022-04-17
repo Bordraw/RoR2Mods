@@ -48,7 +48,7 @@ namespace LunarHeresy
         }
     }
 
-    public class LunarCoinHandler
+    public static class LunarCoinHandler
     {
         // Maps from CSteamId.steamValue to the count of coins that Steam user has
         private static readonly Dictionary<ulong, uint> coinState = new Dictionary<ulong, uint>();
@@ -85,8 +85,8 @@ namespace LunarHeresy
         }
 
         [Server]
-        public static void Load(string json) {
-            Load(JsonConvert.DeserializeObject<Dictionary<ulong, uint>>(json));
+        public static void Load(string savedState) {
+            Load(DeserializeState(savedState));
         }
 
         [Server]
@@ -126,7 +126,19 @@ namespace LunarHeresy
             LunarHeresy.Logger.LogInfo("Loaded coin tracking.");
         }
 
-        public static string Save() {
+        public static string Save()
+        {
+            // Convert the keys and values into arrays?
+            return SerializeState();
+        }
+
+        private static Dictionary<ulong, uint> DeserializeState(string savedState)
+        {
+            // Convert the keys and values into arrays?
+            return JsonConvert.DeserializeObject<Dictionary<ulong, uint>>(savedState);
+        }
+
+        private static string SerializeState() {
             // Convert the keys and values into arrays?
             return JsonConvert.SerializeObject(coinState);
         }
@@ -142,10 +154,10 @@ namespace LunarHeresy
             if (!coinState.ContainsKey(steamId))
             {
                 coinState.Add(steamId, count);
-                LunarHeresy.Logger.LogInfo(steamId + " added to coin tracking");
+                LunarHeresy.Logger.LogInfo($"{steamId} added to coin tracking");
             } else if (force) {
                 coinState[steamId] = count;
-                LunarHeresy.Logger.LogInfo("Lunar coins set to " + count + " for " + steamId);
+                LunarHeresy.Logger.LogInfo($"Lunar coins set to {count} for {steamId}");
             }
 
             // Update the clients
@@ -154,20 +166,21 @@ namespace LunarHeresy
 
         public static void GiveCoinsToUser(ulong steamId, uint count)
         {
-            if (!coinState.ContainsKey(steamId)) {
-                // TODO: This can be called by the client, need to account for that
-                AddUser(steamId, count);
-            } else {
-                coinState[steamId] += count;
+            if (!coinState.ContainsKey(steamId))
+            {
+                LunarHeresy.Logger.LogInfo($"Tried to give coins to non-registered user {steamId}");
+                return;
             }
-            LunarHeresy.Logger.LogInfo("Gave " + count + " lunar coins to " + steamId);
+
+            coinState[steamId] += count;
+            LunarHeresy.Logger.LogInfo($"Gave {count} lunar coins to {steamId}");
         }
 
         public static void TakeCoinsFromUser(ulong steamId, uint count)
         {
             if (!coinState.ContainsKey(steamId)) {
                 coinState.Add(steamId, 0);
-                LunarHeresy.Logger.LogInfo(steamId + " added to coin tracking");
+                LunarHeresy.Logger.LogInfo($"{steamId} added to coin tracking");
                 return;
             }
 
@@ -178,7 +191,7 @@ namespace LunarHeresy
                 coinState[steamId] -= count;
             }
             
-            LunarHeresy.Logger.LogInfo("Took " + count + " lunar coins from " + steamId);
+            LunarHeresy.Logger.LogInfo($"Took {count} lunar coins from {steamId}");
         }
 
         public static uint GetCoinsFromUser(ulong steamId)

@@ -10,7 +10,7 @@ namespace LunarHeresy
     {
         private static LunarHeresy lunarHeresyInstance;
 
-        internal static string[] lunarInteractables = {
+        internal static readonly string[] lunarInteractables = {
             "RoR2/Base/LunarRecycler/LunarRecycler.prefab",
             "RoR2/Base/LunarChest/LunarChest.prefab",
             "RoR2/Base/NewtStatue/NewtStatue.prefab",
@@ -79,6 +79,7 @@ namespace LunarHeresy
             else if (purchaseInteraction.name.StartsWith("NewtStatue"))
             {
                 newPrice = (int)Configuration.NewtShrineCost.Value;
+                if (newPrice == 0) purchaseInteraction.contextToken = "NEWT_STATUE_CONTEXT_FREE";
             }
 
             // Don't change the price on unrecognized interactables
