@@ -15,8 +15,14 @@ namespace LunarHeresy
         public static ConfigEntry<bool> ShopRefresh;
         public static ConfigEntry<float> SeerCost;
 
+        public static ConfigEntry<bool> EnableLunarCoinCauldrons;
+        public static ConfigEntry<float> WhiteCauldronCost;
+        public static ConfigEntry<float> GreenCauldronCost;
+        public static ConfigEntry<float> RedCauldronCost;
+
         public static void Register(LunarHeresy instance)
         {
+            #region Coin Drop Rate
             DropChance = instance.Config.Bind(
                 "Coin Drop Rate", 
                 "Drop Chance", 
@@ -35,7 +41,9 @@ namespace LunarHeresy
                 0.5f, 
                 new ConfigDescription("The lowest %chance for enemies to drop coins after DropMulti is applied. Vanilla is 0")
                 );
+            #endregion
 
+            #region Lunar Prices
             NewtShrineCost = instance.Config.Bind(
                 "Lunar Prices",
                 "Newt Shrine Cost",
@@ -66,6 +74,34 @@ namespace LunarHeresy
                 1f, 
                 new ConfigDescription("The cost of Lunar Seers in the Bazaar. Vanilla is 3")
                 );
+            #endregion
+
+            #region Lunar Cauldrons
+            EnableLunarCoinCauldrons = instance.Config.Bind(
+                "Lunar Cauldrons",
+                "Enable",
+                true,
+                new ConfigDescription("Change lunar cauldrons to cost lunar coins instead of items? Vanilla is false")
+                );
+            WhiteCauldronCost = instance.Config.Bind(
+                "Lunar Cauldrons",
+                "White Cauldron Cost",
+                1f,
+                new ConfigDescription("How many lunar coins it costs to use the cauldron that creates a white item.")
+                );
+            GreenCauldronCost = instance.Config.Bind(
+                "Lunar Cauldrons",
+                "Green Cauldron Cost",
+                3f,
+                new ConfigDescription("How many lunar coins it costs to use the cauldron that creates a green item.")
+                );
+            RedCauldronCost = instance.Config.Bind(
+                "Lunar Cauldrons",
+                "Red Cauldron Cost",
+                5f,
+                new ConfigDescription("How many lunar coins it costs to use the cauldron that creates a red item.")
+                );
+            #endregion
         }
     }
 }

@@ -1,10 +1,5 @@
-﻿using BepInEx;
-using R2API;
-using R2API.Networking;
-using R2API.Utils;
-using RoR2;
+﻿using RoR2;
 using System.Collections;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
@@ -92,7 +87,6 @@ namespace LunarHeresy
             if (newPrice < 0 || newPrice == purchaseInteraction.Networkcost)
             {
                 LunarHeresy.Logger.LogDebug(purchaseInteraction.name + " price not modified");
-                return;
             }
             else
             {

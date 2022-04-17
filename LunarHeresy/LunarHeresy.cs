@@ -15,12 +15,10 @@ namespace LunarHeresy
     //BaseUnityPlugin itself inherits from MonoBehaviour, so you can use this as a reference for what you can declare and use in your plugin class: https://docs.unity3d.com/ScriptReference/MonoBehaviour.html
     public class LunarHeresy : BaseUnityPlugin
     {
-        // The Plugin GUID should be a unique ID for this plugin, which is human readable (as it is used in places like the config).
-        // If we see this PluginGUID as it is on thunderstore, we will deprecate this mod. Change the PluginAuthor and the PluginName !
-        public const string PluginGUID = PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Bordraw";
         public const string PluginName = "LunarHeresy";
         public const string PluginVersion = "1.0.0";
+        public const string PluginGUID = PluginAuthor + "." + PluginName;
 
         public static new BepInEx.Logging.ManualLogSource Logger;
 
@@ -38,6 +36,9 @@ namespace LunarHeresy
 
             // Enforce lunar price changes
             LunarPricesHandler.Register(this);
+
+            // Change lunar cauldrons to cost lunar coins
+            LunarCauldronHandler.Register(this);
 
             // Enable ProperSave Compatibility
             if (ProperSaveCompatibility.enabled) ProperSaveCompatibility.Setup();

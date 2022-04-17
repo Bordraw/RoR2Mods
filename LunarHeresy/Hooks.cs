@@ -1,5 +1,4 @@
-﻿using BepInEx;
-using MonoMod.Cil;
+﻿using MonoMod.Cil;
 using R2API.Utils;
 using RoR2;
 using System;
@@ -42,6 +41,9 @@ namespace LunarHeresy
             On.RoR2.ShopTerminalBehavior.GenerateNewPickupServer += ShopTerminalBehavior_GenerateNewPickupServer;
             On.RoR2.BazaarController.SetUpSeerStations += BazaarController_SetUpSeerStations;
 
+            // Modify lunar cauldron behavior
+            On.RoR2.EntityLogic.DelayedEvent.CallDelayed += DelayedEvent_CallDelayed;
+
             // Set up twisted scavenger loop with extended fadeout
             EntityStates.Missions.LunarScavengerEncounter.FadeOut.duration *= 5.0f;
             EntityStates.Missions.LunarScavengerEncounter.FadeOut.delay *= 3.0f;
@@ -69,9 +71,14 @@ namespace LunarHeresy
         private static void HUD_Update(On.RoR2.UI.HUD.orig_Update orig, RoR2.UI.HUD self)
         {
             orig(self);
-            self.lunarCoinText.targetValue = (int)LunarCoinHandler.GetCoinsFromUser(self._localUserViewer.currentNetworkUser.Network_id.steamId.steamValue);
-            var lunarCoinTextElement = self.lunarCoinContainer.transform.Find("LunarCoinSign").GetComponent<RoR2.UI.HGTextMeshProUGUI>();
-            if (lunarCoinTextElement != null) lunarCoinTextElement.text = "<sprite name=\"LunarCoin\" color=#adf2fa>";
+
+            if (self == null || self?.lunarCoinText == null || self?.lunarCoinContainer == null) return;
+
+            var user = self._localUserViewer?.currentNetworkUser?.Network_id.steamId.steamValue;
+            if(user != null) self.lunarCoinText.targetValue = (int)LunarCoinHandler.GetCoinsFromUser((ulong)user);
+            
+            var lunarCoinText = self.lunarCoinContainer.transform?.Find("LunarCoinSign")?.GetComponent<RoR2.UI.HGTextMeshProUGUI>()?.text;
+            if (lunarCoinText != null) lunarCoinText = "<sprite name=\"LunarCoin\" color=#adf2fa>";
         }
 
         private static void Run_OnUserAdded(On.RoR2.Run.orig_OnUserAdded orig, Run self, NetworkUser user)
@@ -132,7 +139,11 @@ namespace LunarHeresy
         private static void SceneDirector_Start(On.RoR2.SceneDirector.orig_Start orig, SceneDirector self)
         {
             orig(self);
-            if (NetworkServer.active) LunarPricesHandler.EnforceConfiguredInteractablePrices();
+            if (NetworkServer.active)
+            {
+                LunarPricesHandler.EnforceConfiguredInteractablePrices();
+                LunarCauldronHandler.EnforceConfiguredCauldronPrices();
+            }
         }
 
         private static void BazaarController_SetUpSeerStations(On.RoR2.BazaarController.orig_SetUpSeerStations orig, BazaarController self)
@@ -158,9 +169,29 @@ namespace LunarHeresy
         [Server]
         private static void ShopTerminalBehavior_GenerateNewPickupServer(On.RoR2.ShopTerminalBehavior.orig_GenerateNewPickupServer orig, ShopTerminalBehavior self)
         {
-            if (self.name.StartsWith("LunarShop") && Configuration.ShopRefresh.Value) { self.NetworkhasBeenPurchased = false; }
+            if (self.name.StartsWith("LunarShop") && Configuration.ShopRefresh.Value) { 
+                self.NetworkhasBeenPurchased = false;
+                orig(self);
+                self.GetComponent<PurchaseInteraction>().SetAvailable(true);
+                return;
+            }
+
             orig(self);
-            if (self.name.StartsWith("LunarShop") && Configuration.ShopRefresh.Value) { self.GetComponent<PurchaseInteraction>().SetAvailable(true); }
+        }
+
+        [Server]
+        private static void DelayedEvent_CallDelayed(On.RoR2.EntityLogic.DelayedEvent.orig_CallDelayed orig, RoR2.EntityLogic.DelayedEvent self, float timer) 
+        {
+            if (NetworkServer.active & Configuration.EnableLunarCoinCauldrons.Value && self.name.StartsWith("LunarCauldron"))
+            {
+                // When using lunar coins to pay for cauldrons we don't want a delay to wait for items
+                timer = 0f;
+
+                // Remove duplicate DropPickup calls so it only drops one white per lunar coin
+                LunarCauldronHandler.MaybeModifyLunarCauldronDrop(self);
+            }
+
+            orig(self, timer);
         }
         #endregion
 

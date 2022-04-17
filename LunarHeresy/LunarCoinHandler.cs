@@ -66,7 +66,7 @@ namespace LunarHeresy
                     {
                         NetworkUser networkUser = Util.LookUpBodyNetworkUser(context.activator.gameObject);
                         ulong steamId = networkUser.Network_id.steamId.steamValue;
-                        return GetCoinsFromUser(steamId) > context.cost;
+                        return GetCoinsFromUser(steamId) >= context.cost;
                     },
                     payCost = delegate (CostTypeDef costTypeDef, CostTypeDef.PayCostContext context)
                     {
