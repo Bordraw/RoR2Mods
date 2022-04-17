@@ -20,6 +20,7 @@ namespace LunarHeresy
         public static ConfigEntry<float> WhiteCauldronCost;
         public static ConfigEntry<float> GreenCauldronCost;
         public static ConfigEntry<float> RedCauldronCost;
+        public static ConfigEntry<bool> GuaranteeWhiteOnMoon;
 
         public static void Register(LunarHeresy instance)
         {
@@ -105,8 +106,14 @@ namespace LunarHeresy
             RedCauldronCost = instance.Config.Bind(
                 "Lunar Cauldrons",
                 "Red Cauldron Cost",
-                5f,
+                7f,
                 new ConfigDescription("How many lunar coins it costs to use the cauldron that creates a red item.")
+                );
+            GuaranteeWhiteOnMoon = instance.Config.Bind(
+                "Lunar Cauldrons",
+                "Guarantee white cauldron on Commencement",
+                true,
+                new ConfigDescription("Guarantees that at least one cauldron on commencement will be a white cauldron. Vanilla is false")
                 );
             #endregion
         }

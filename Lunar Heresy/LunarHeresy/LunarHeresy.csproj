@@ -59,7 +59,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="ProperSave">
-      <HintPath>..\..\..\..\AppData\Roaming\Thunderstore Mod Manager\DataFolder\RiskOfRain2\profiles\Modded\BepInEx\plugins\KingEnderBrine-ProperSave\ProperSave\ProperSave.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Roaming\Thunderstore Mod Manager\DataFolder\RiskOfRain2\cache\KingEnderBrine-ProperSave\2.8.3\plugins\ProperSave\ProperSave.dll</HintPath>
     </Reference>
     <Reference Include="R2API">
       <HintPath>libs\R2API.dll</HintPath>

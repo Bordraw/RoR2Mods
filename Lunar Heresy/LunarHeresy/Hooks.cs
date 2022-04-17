@@ -5,6 +5,7 @@ using System;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 namespace LunarHeresy
 {
@@ -162,8 +163,17 @@ namespace LunarHeresy
             orig(self);
             if (NetworkServer.active)
             {
+                // Ensure all lunar interactables on the stage match their configured price
                 LunarPricesHandler.EnforceConfiguredInteractablePrices();
+
+                // Ensure all cauldrons on the stage match their configured price
                 LunarCauldronHandler.EnforceConfiguredCauldronPrices();
+
+                // Make sure that white cauldron is present on Commencement
+                if (Configuration.GuaranteeWhiteOnMoon.Value && SceneManager.GetActiveScene().name == "moon2") {
+                    LunarHeresy.Logger.LogDebug("Guaranteeing white cauldron on commencement");
+                    LunarCauldronHandler.GuaranteeWhiteCauldron();
+                }
             }
         }
 

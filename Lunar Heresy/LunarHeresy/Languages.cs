@@ -23,7 +23,7 @@ namespace LunarHeresy
 					LanguageAPI.AddPath(fileName);
 					LunarHeresy.Logger.LogDebug($"Loaded language file {fileName}");
 				}
-			} catch (DirectoryNotFoundException e) {
+			} catch (DirectoryNotFoundException) {
 				LunarHeresy.Logger.LogError($"Could not load language files, directory '{RootLanguageFolderPath}' was not found.");
 			}
 			

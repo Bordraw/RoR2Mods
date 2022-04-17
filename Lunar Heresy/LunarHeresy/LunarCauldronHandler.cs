@@ -19,9 +19,14 @@ namespace LunarHeresy
 
         private static LunarHeresy lunarHeresyInstance;
 
+        private static SpawnCard whiteCauldronCard;
+
         public static void Register(LunarHeresy instance)
         {
             lunarHeresyInstance = instance;
+
+            // Create spawn card for white cauldron
+            whiteCauldronCard = ScriptableObject.CreateInstance<SpawnCard>();
 
             if (!(bool)Configuration.EnableLunarCoinCauldrons.Value) return;
 
@@ -39,6 +44,8 @@ namespace LunarHeresy
 
                 var delayedEvent = cauldronInteractable.GetComponent<RoR2.EntityLogic.DelayedEvent>();
                 if (delayedEvent != null) MaybeModifyLunarCauldronDrop(delayedEvent);
+
+                if (cauldronInteractable.name.StartsWith("LunarCauldron, RedToWhite")) whiteCauldronCard.prefab = cauldronInteractable;
             }
 
             LunarHeresy.Logger.LogInfo("Finished modifying lunar cauldron prefabs.");
@@ -113,13 +120,61 @@ namespace LunarHeresy
         }
 
         [Server]
+        public static void GuaranteeWhiteCauldron() {
+            if (!NetworkServer.active)
+            {
+                LunarHeresy.Logger.LogWarning("[Server] function 'LunarCauldronHandler.GuaranteeWhiteCauldron' called on client");
+                return;
+            }
+
+            if (!(bool)Configuration.EnableLunarCoinCauldrons.Value) return;
+
+            lunarHeresyInstance.StartCoroutine(_GuaranteeWhiteCauldron());
+        }
+
+        private static IEnumerator _GuaranteeWhiteCauldron()
+        {
+            // Delay to give time for instantiation of stage interactables.
+            yield return null;
+
+            GameObject cauldronToReplace = null;
+            foreach (PurchaseInteraction purchaseInteraction in InstanceTracker.GetInstancesList<PurchaseInteraction>()) {
+                if (purchaseInteraction.name.StartsWith("LunarCauldron")) {
+                    if (purchaseInteraction.name.StartsWith("LunarCauldron, RedToWhite"))
+                    {
+                        LunarHeresy.Logger.LogDebug("White cauldron found, no replacement needed.");
+                        yield break;
+                    }
+                    cauldronToReplace = purchaseInteraction.gameObject;
+                }
+            }
+
+            if (cauldronToReplace == null)
+            {
+                LunarHeresy.Logger.LogDebug("No cauldron found to replace with white cauldron.");
+                yield break;
+            }
+
+            // If no white cauldron is found, replace the last found cauldron with one.
+            cauldronToReplace.SetActive(false);
+            DirectorCore.instance.TrySpawnObject(new DirectorSpawnRequest(whiteCauldronCard, new DirectorPlacementRule
+            {
+                position = cauldronToReplace.transform.position,
+                minDistance = 0,
+                maxDistance = 0,
+                placementMode = DirectorPlacementRule.PlacementMode.Direct,
+            }, RoR2Application.rng));
+            LunarHeresy.Logger.LogInfo($"Replaced {cauldronToReplace.name} with white cauldron.");
+        }
+
+        [Server]
         // Changes all of the cauldrons on the stage to match config values
         // This accounts for interactables instantiated before the prefabs were modified.
         public static void EnforceConfiguredCauldronPrices()
         {
             if (!NetworkServer.active)
             {
-                LunarHeresy.Logger.LogWarning("[Server] function 'LunarCauldronhandler.EnforceConfiguredCauldronPrices' called on client");
+                LunarHeresy.Logger.LogWarning("[Server] function 'LunarCauldronHandler.EnforceConfiguredCauldronPrices' called on client");
                 return;
             }
 
